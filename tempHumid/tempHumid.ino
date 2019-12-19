@@ -1,4 +1,5 @@
-#include "dht.h"
+#include <DHT.h>
+#include <DHT_U.h>
 #define dht_apin A0
 
 dht DHT;
