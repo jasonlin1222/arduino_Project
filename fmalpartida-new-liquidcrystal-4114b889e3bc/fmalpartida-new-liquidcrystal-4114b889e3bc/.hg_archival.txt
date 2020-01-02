@@ -1,6 +1,0 @@
-repo: 4745f01bb4722dc06b7b0a75823a95636b078ad4
-node: 4114b889e3bc3bd445e26e0c52e33fe18e99534a
-branch: integration
-latesttag: 1.5.0
-latesttagdistance: 6
-changessincelatesttag: 6
