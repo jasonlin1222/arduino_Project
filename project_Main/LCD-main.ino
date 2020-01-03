@@ -4,6 +4,7 @@
 
 #define DHTPIN 2
 #define DHTTYPE DHT11
+#define Grove_Water_Sensor 13
 DHT dht(DHTPIN, DHTTYPE);
 
 // Wiring: SDA pin is connected to A4 and SCL pin to A5.
@@ -12,9 +13,11 @@ LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2); // Change to (0x27,16,2)
 
 
 void setup() {
+  pinMode(Grove_Water_Sensor, 13);
   // Initiate the LCD:
   lcd.init();
   lcd.backlight();
+
   dht.begin();
 }
 void loop() {
@@ -22,6 +25,7 @@ void loop() {
 
   String h = (String)dht.readHumidity();
   String t = (String)dht.readTemperature();
+  String w = digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water";
   
   lcd.setCursor(0, 0);
   lcd.print("Humid: " + h );
