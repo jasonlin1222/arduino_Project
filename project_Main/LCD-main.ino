@@ -12,8 +12,16 @@ DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2); // Change to (0x27,16,2) for 16x2 LCD.
 
 
+int encoder0PinA = 3;
+int encoder0PinB = 4;
+int encoder0Pos = 0;
+int encoder0PinALast = LOW;
+int n = LOW;
+
 void setup() {
   pinMode(Grove_Water_Sensor, 13);
+  pinMode (encoder0PinA, INPUT);
+  pinMode (encoder0PinB, INPUT);
   // Initiate the LCD:
   lcd.init();
   lcd.backlight();
@@ -22,7 +30,16 @@ void setup() {
 }
 void loop() {
     delay(2000);
-    int spin = analogRead() % 3; //opt data
+    n = digitalRead(encoder0PinA);
+    if ((encoder0PinALast == LOW) && (n == HIGH)) {
+        if (digitalRead(encoder0PinB) == LOW) 
+            encoder0Pos--;
+        else 
+            encoder0Pos++;        
+        encoder0PinALast = n;
+    }
+
+    int spin = encoder0Pos % 3;
     
     String h = (String)dht.readHumidity();
     String t = (String)dht.readTemperature();
@@ -44,6 +61,10 @@ void loop() {
                 //write relay high
                 lcd.serCursor(0, 1);
                 lcd print("starting......");
+                delay(10000);
+                digitalWrite(7, HIGH);
+                delay(5000);
+                digitalWrite(7,LOW);
                 //write relay low
             }
 }
