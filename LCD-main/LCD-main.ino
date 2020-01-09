@@ -12,11 +12,11 @@ DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2); // Change to (0x27,16,2) for 16x2 LCD.
 
 
-int encoder0PinA = 3;
+int encoder0PinA = 5;
 int encoder0PinB = 4;
 int encoder0Pos = 0;
 int encoder0PinALast = LOW;
-int n = LOW;
+int n = digitalRead(encoder0PinA);
 
 void setup() {
   pinMode(Grove_Water_Sensor, 13);
@@ -25,46 +25,54 @@ void setup() {
   // Initiate the LCD:
   lcd.init();
   lcd.backlight();
+  n = digitalRead(encoder0PinA);
 
   dht.begin();
 }
 void loop() {
-    delay(2000);
-    n = digitalRead(encoder0PinA);
-    if ((encoder0PinALast == LOW) && (n == HIGH)) {
-        if (digitalRead(encoder0PinB) == LOW) 
+    delay(000);
+    
+    if(digitalRead(encoder0PinA) != n){
+        if (digitalRead(encoder0PinB) != digitalRead(encoder0PinA)){
             encoder0Pos--;
-        else 
-            encoder0Pos++;        
-        encoder0PinALast = n;
+            lcd.clear();
+        }
+        else {
+            encoder0Pos++;
+            lcd.clear();  
+        }
     }
-
+    bool button = digitalRead(3);
     int spin = encoder0Pos % 3;
     
     String h = (String)dht.readHumidity();
     String t = (String)dht.readTemperature();
     String w = digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water";
 
+    lcd.setCursor(0, 1);
+    lcd.print(spin);
     switch(spin){
         case 0:
             lcd.setCursor(0, 0);
             lcd.print("Humid: " + h );
             lcd.setCursor(0, 1);
-            lcd.print("Temp: "+ t);
+            //lcd.print("Temp: "+ t);
         case 1:
             lcd.setCursor(0, 0);
             lcd.print("Water: " + w);
         case 2:
             lcd.setCursor(0, 0);
             lcd.print("press button for pump");
+            
             if(button){
                 //write relay high
-                lcd.serCursor(0, 1);
-                lcd print("starting......");
+                lcd.setCursor(0, 1);
+                lcd.print("starting......");
                 delay(10000);
                 digitalWrite(7, HIGH);
                 delay(5000);
                 digitalWrite(7,LOW);
                 //write relay low
             }
+    }
 }
