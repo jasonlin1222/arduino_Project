@@ -21,14 +21,29 @@ void setup() {
   dht.begin();
 }
 void loop() {
-  delay(2000);
+    delay(2000);
+    int spin = analogRead() % 3; //opt data
+    
+    String h = (String)dht.readHumidity();
+    String t = (String)dht.readTemperature();
+    String w = digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water";
 
-  String h = (String)dht.readHumidity();
-  String t = (String)dht.readTemperature();
-  String w = digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water";
-  
-  lcd.setCursor(0, 0);
-  lcd.print("Humid: " + h );
-  lcd.setCursor(0, 1);
-  lcd.print("Temp: "+ t);
+    switch(spin){
+        case 0:
+            lcd.setCursor(0, 0);
+            lcd.print("Humid: " + h );
+            lcd.setCursor(0, 1);
+            lcd.print("Temp: "+ t);
+        case 1:
+            lcd.setCursor(0, 0);
+            lcd.print("Water: " + w);
+        case 2:
+            lcd.setCursor(0, 0);
+            lcd.print("press button for pump");
+            if(button){
+                //write relay high
+                lcd.serCursor(0, 1);
+                lcd print("starting......");
+                //write relay low
+            }
 }
