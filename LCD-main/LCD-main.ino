@@ -42,6 +42,7 @@ void loop() {
       if(lastChanged <= 0){
         if (digitalRead(encoder0PinB) != digitalRead(encoder0PinA)){
             encoder0Pos--;
+            //to make sure that the encoder0Pos does not go below 0 because the spin = (encoder0Pos % 3) which will break the switch statements
             if(encoder0Pos <= 0){
               encoder0Pos = 3;
             }
@@ -49,6 +50,7 @@ void loop() {
         else {
             encoder0Pos++;
         }
+        //to make sure that when the rotary encoder sends too turning messages but I only turned once, it will only register once
         lastChanged = 100;
         Serial.println(encoder0Pos);
       }
@@ -59,6 +61,7 @@ void loop() {
     //bool button = digitalRead(3);
     spin = encoder0Pos % 3;
 
+    //to put in a variable that is true if the screen needs updates
     changed = false;
     if((String)dht.readHumidity() != h){
       changed = true;
@@ -73,10 +76,10 @@ void loop() {
       w = (digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water");
     }
 
-    //Serial.println(spin);
-    lcd.setCursor(0, 1);
+    //to print out the things to the LCD
     switch(spin){
         case 0:
+        //to make sure to only update the screen when needed because lcd.print takes a lot of time
         if(previousSpin != 0){
           Serial.println("humid");
           lcd.clear();
@@ -114,7 +117,7 @@ void loop() {
 
         }
         
-            //button does not work as intended
+            //button does not work as intended. Don't know what is going on with the input from the button, it flashes true when i touch the rotary encoder but didn't press it.
             /*if(button){
                 //write relay high
                 lcd.setCursor(0, 1);
