@@ -12,59 +12,110 @@ DHT dht(DHTPIN, DHTTYPE);
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2); // Change to (0x27,16,2) for 16x2 LCD.
 
 
+int lastChanged = 0;
 int encoder0PinA = 5;
 int encoder0PinB = 4;
-int encoder0Pos = 0;
-int encoder0PinALast = LOW;
-int n = digitalRead(encoder0PinA);
+int encoder0Pos = 1;
+int previousState = digitalRead(encoder0PinA);
+int spin = encoder0Pos % 3;
+int previousSpin = 5;
+bool changed = false;
+String h; 
+String t;
+String w;
 
 void setup() {
+  Serial.begin(9600);
   pinMode(Grove_Water_Sensor, 13);
   pinMode (encoder0PinA, INPUT);
   pinMode (encoder0PinB, INPUT);
   // Initiate the LCD:
   lcd.init();
   lcd.backlight();
-  n = digitalRead(encoder0PinA);
-
+  previousState = digitalRead(encoder0PinA);
   dht.begin();
 }
 void loop() {
-    delay(000);
-    
-    if(digitalRead(encoder0PinA) != n){
+    //delay(000);
+    lastChanged--;
+    if(digitalRead(encoder0PinA) != previousState){
+      if(lastChanged <= 0){
         if (digitalRead(encoder0PinB) != digitalRead(encoder0PinA)){
             encoder0Pos--;
-            lcd.clear();
+            if(encoder0Pos <= 0){
+              encoder0Pos = 3;
+            }
         }
         else {
             encoder0Pos++;
-            lcd.clear();  
         }
+        lastChanged = 100;
+        Serial.println(encoder0Pos);
+      }
+      previousState = digitalRead(encoder0PinA);
     }
-    bool button = digitalRead(3);
-    int spin = encoder0Pos % 3;
-    
-    String h = (String)dht.readHumidity();
-    String t = (String)dht.readTemperature();
-    String w = digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water";
 
+    
+    //bool button = digitalRead(3);
+    spin = encoder0Pos % 3;
+
+    changed = false;
+    if((String)dht.readHumidity() != h){
+      changed = true;
+      h = (String)dht.readHumidity();
+    }
+    if((String)dht.readTemperature() != t){
+      changed = true;
+      t = (String)dht.readTemperature();
+    }
+    if((String)(digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water") != w){
+      changed = true;
+      w = (digitalRead(Grove_Water_Sensor) == LOW ? "Yes water":"No water");
+    }
+
+    //Serial.println(spin);
     lcd.setCursor(0, 1);
-    lcd.print(spin);
     switch(spin){
         case 0:
-            lcd.setCursor(0, 0);
-            lcd.print("Humid: " + h );
-            lcd.setCursor(0, 1);
-            //lcd.print("Temp: "+ t);
+        if(previousSpin != 0){
+          Serial.println("humid");
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Humid: " + h );
+          lcd.setCursor(0, 1);
+          lcd.print("Temp: "+ t);
+        }else if(changed == true){
+          lcd.setCursor(7, 1);
+          lcd.print(t);
+          lcd.setCursor(6, 1);
+          lcd.print(t);
+        }
+        break;
+        
         case 1:
-            lcd.setCursor(0, 0);
-            lcd.print("Water: " + w);
+        if(previousSpin != 1){
+          Serial.println("water");
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("Water: " + w);
+        }else if(changed == true){
+          lcd.setCursor(7, 0);
+          lcd.print(w);
+        }
+        break;
+        
         case 2:
-            lcd.setCursor(0, 0);
-            lcd.print("press button for pump");
-            
-            if(button){
+        if(previousSpin != 2){
+          Serial.println("button");
+          lcd.clear();
+          lcd.setCursor(0, 0);
+          lcd.print("press button for pump");
+        }else if(changed == true){
+
+        }
+        
+            //button does not work as intended
+            /*if(button){
                 //write relay high
                 lcd.setCursor(0, 1);
                 lcd.print("starting......");
@@ -73,6 +124,8 @@ void loop() {
                 delay(5000);
                 digitalWrite(7,LOW);
                 //write relay low
-            }
+            }*/
+        break;
     }
+    previousSpin = spin;
 }
